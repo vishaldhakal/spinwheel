@@ -116,7 +116,7 @@ export default function InfoForm({
         `${
           process.env.NEXT_PUBLIC_BACKEND_URL
         }/api/offers/get-gift-list/?lucky_draw_system_id=${
-          result.gift?.lucky_draw_system || initialOrgData?.id || 1
+          initialOrgData?.id || 3
         }`
       );
 
@@ -125,7 +125,17 @@ export default function InfoForm({
       }
 
       const giftListData: GiftItem[] = await giftListResponse.json();
-      setGiftList(giftListData);
+
+      // Add "Better Luck" gift item at the beginning of the list
+      const betterLuckGift: GiftItem = {
+        id: -1, // Use negative ID to distinguish from real gifts
+        name: "Better Luck",
+        image: "/betterlucknexttime.png",
+        lucky_draw_system: initialOrgData?.id || 3,
+      };
+
+      // Add Better Luck as the first item (will be at the top of the wheel)
+      setGiftList([betterLuckGift, ...giftListData]);
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -149,8 +159,8 @@ export default function InfoForm({
       <Header initialOrgData={initialOrgData} />
       <main className="flex-grow flex flex-col justify-center items-center py-8 px-3">
         {!submissionResponse ? (
-          <div className="bg-white p-8 rounded-lg max-w-md w-full shadow-lg">
-            <h2 className="text-3xl font-black mb-6 text-center text-organization-primary">
+          <div className="bg-white rounded-lg max-w-md w-full shadow-lg p-8">
+            <h2 className="text-xl md:text-3xl font-black mb-6 text-center text-organization-primary">
               Enter Your Details
             </h2>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

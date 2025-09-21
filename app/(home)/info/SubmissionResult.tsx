@@ -22,6 +22,10 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
   const [hasSpun, setHasSpun] = useState<boolean>(false);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
   const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [showStoppingPosition, setShowStoppingPosition] =
+    useState<boolean>(false);
+  const [stoppedAtGift, setStoppedAtGift] = useState<GiftItem | null>(null);
+  const [hasValidGift, setHasValidGift] = useState<boolean>(false);
   const [windowDimensions, setWindowDimensions] = useState<{
     width: number;
     height: number;
@@ -57,22 +61,29 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
     if (!isSpinning && submissionResponse && !hasSpun) {
       setIsSpinning(true);
       setWinner(null);
+      setShowStoppingPosition(false);
+      setStoppedAtGift(null);
 
       // Handle both null and empty array cases for gift
-      const hasValidGift =
+      const validGift =
         submissionResponse.gift &&
         !Array.isArray(submissionResponse.gift) &&
         typeof submissionResponse.gift === "object" &&
         submissionResponse.gift.id;
 
-      const winningIndex = hasValidGift
+      setHasValidGift(!!validGift);
+
+      // If gift is empty array or null, stop at Better Luck (index 0)
+      const winningIndex = validGift
         ? giftList.findIndex(
             (gift) => gift.id === (submissionResponse.gift as GiftItem).id
           )
-        : -1;
+        : 0; // Always stop at Better Luck when no valid gift
+
       const prizeAngle = 360 / giftList.length;
       const fullRotations = Math.floor(Math.random() * 5 + 5) * 360;
 
+      // Calculate target rotation - account for Better Luck being at index 0
       const targetRotation =
         fullRotations + (360 - winningIndex * prizeAngle - prizeAngle / 2);
 
@@ -81,14 +92,21 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
       // Set isSpinning to false after 5 seconds (spinning animation duration)
       setTimeout(() => {
         setIsSpinning(false);
-        setWinner(hasValidGift ? (submissionResponse.gift as GiftItem) : null);
+        setWinner(validGift ? (submissionResponse.gift as GiftItem) : null);
         setHasSpun(true);
 
-        // Show popup and confetti after an additional 3 seconds
+        // Show where the wheel stopped first - always show the actual stopped position
+        const stoppedGift = giftList[winningIndex]; // Use the calculated winning index
+        setStoppedAtGift(stoppedGift);
+        setShowStoppingPosition(true);
+
+        // Show popup and confetti after showing stopping position
         setTimeout(() => {
+          setShowStoppingPosition(false);
           setShowPopup(true);
 
           if (
+            validGift &&
             submissionResponse.gift &&
             !Array.isArray(submissionResponse.gift) &&
             typeof submissionResponse.gift === "object" &&
@@ -106,7 +124,7 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
               description: "Unfortunately, you didn't win a prize this time.",
             });
           }
-        }, 1000);
+        }, 4000); // Show stopping position for 4 seconds (increased from 2)
       }, 5000);
     }
   };
@@ -120,7 +138,7 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
   };
 
   return (
-    <div className="text-center p-8 rounded-lg shadow-xl w-full max-w-4xl">
+    <div className="text-center rounded-lg w-full max-w-4xl">
       {showConfetti && (
         <div
           className="fixed inset-0 pointer-events-none"
@@ -144,6 +162,7 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
         </div>
       )}
       <h2 className="text-4xl font-bold mb-8 text-[#fff]">Spin the Wheel!</h2>
+
       <div className="relative">
         <SpinWheel
           rotation={rotation}
@@ -203,7 +222,10 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
               <X size={24} />
             </button>
             <h3 className="text-2xl font-bold mb-4 flex items-center justify-center">
-              {winner && winner.name && winner.name !== "Better Luck" ? (
+              {hasValidGift &&
+              winner &&
+              winner.name &&
+              winner.name !== "Better Luck" ? (
                 <>
                   <Gift className="mr-2" size={24} />
                   Congratulations!
@@ -215,7 +237,10 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
                 </>
               )}
             </h3>
-            {winner && winner.name && winner.name !== "Better Luck" ? (
+            {hasValidGift &&
+            winner &&
+            winner.name &&
+            winner.name !== "Better Luck" ? (
               <>
                 <p className="text-xl mb-4">You&apos;ve won a {winner.name}!</p>
                 {/* imei number */}

@@ -25,10 +25,15 @@ const SpinWheel: React.FC<SpinWheelProps> = React.memo(
   ({ rotation, winner, giftList, isSpinning, hasSpun }) => {
     const wheelRadius = 45; // Reduced wheel size
     const colors = generateColors(giftList.length);
-    const itemRadius = Math.max(4, 15 - giftList.length * 0.5); // Adjusted item size
-    const padding = 6;
+    const itemRadius = Math.max(4, 13 - giftList.length * 0.5); // Adjusted item size
+    const padding = 3;
 
-    const shouldBlur = hasSpun && !winner;
+    // Removed blur effect as requested
+
+    // Calculate the starting position offset to align "Better Luck" at the top
+    const betterLuckIndex = giftList.findIndex((gift) => gift.id === -1);
+    const startOffset =
+      betterLuckIndex >= 0 ? -(betterLuckIndex / giftList.length) * 360 : 0;
 
     return (
       <div className="relative w-full max-w-sm mx-auto mb-8">
@@ -45,7 +50,7 @@ const SpinWheel: React.FC<SpinWheelProps> = React.memo(
             className={`w-full h-auto ${isSpinning ? "animate-spin" : ""}`}
             viewBox="-50 -50 100 100"
             style={{
-              transform: `rotate(${rotation}deg)`,
+              transform: `rotate(${rotation + startOffset}deg)`,
               transition: isSpinning
                 ? "none"
                 : "transform 5s cubic-bezier(0.25, 0.1, 0.25, 1.2)",
@@ -67,11 +72,6 @@ const SpinWheel: React.FC<SpinWheelProps> = React.memo(
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-              {shouldBlur && (
-                <filter id="blur">
-                  <feGaussianBlur stdDeviation="1.2" />
-                </filter>
-              )}
             </defs>
 
             {/* Wheel segments */}
@@ -83,17 +83,24 @@ const SpinWheel: React.FC<SpinWheelProps> = React.memo(
               const x2 = Math.sin(endAngle) * wheelRadius;
               const y2 = -Math.cos(endAngle) * wheelRadius;
               const largeArcFlag = endAngle - startAngle <= Math.PI ? "0" : "1";
+              const isBetterLuck = gift.id === -1;
 
               return (
                 <path
                   key={index}
                   d={`M 0 0 L ${x1} ${y1} A ${wheelRadius} ${wheelRadius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`}
-                  fill={colors[index]}
-                  stroke="rgba(255, 255, 255, 0.6)"
-                  strokeWidth="0.3"
+                  fill={isBetterLuck ? "#ff6666" : colors[index]}
+                  stroke={
+                    isBetterLuck
+                      ? "rgba(255, 255, 255, 0.9)"
+                      : "rgba(255, 255, 255, 0.6)"
+                  }
+                  strokeWidth={isBetterLuck ? "0.5" : "0.3"}
                   filter="url(#shadow)"
                   style={{
                     transition: "all 0.3s ease",
+                    animation:
+                      isBetterLuck && !hasSpun ? "pulse 2s infinite" : "none",
                   }}
                 />
               );
@@ -105,16 +112,19 @@ const SpinWheel: React.FC<SpinWheelProps> = React.memo(
               const x = (wheelRadius - itemRadius - padding) * Math.sin(angle);
               const y = -(wheelRadius - itemRadius - padding) * Math.cos(angle);
               const isWinner = winner?.id === gift.id;
+              const isBetterLuck = gift.id === -1;
 
               return (
                 <g
                   key={index}
                   transform={`translate(${x}, ${y})`}
-                  filter={shouldBlur ? "url(#blur)" : "url(#glow)"}
+                  filter="url(#glow)"
                 >
                   <circle
                     r={itemRadius}
-                    fill="#fff"
+                    fill={isBetterLuck ? "#ff6666" : "#fff"}
+                    stroke={isWinner ? "#ffd700" : "none"}
+                    strokeWidth={isWinner ? "0.5" : "0"}
                     style={{
                       opacity: winner && !isWinner ? 0.3 : 1,
                       transition: "all 0.5s ease",

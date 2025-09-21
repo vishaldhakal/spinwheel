@@ -11,14 +11,14 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ initialOrgData }) => {
   return (
-    <header className="w-full p-4 flex justify-center items-center bg-white sticky top-0">
+    <header className="w-full p-2 flex justify-center items-center bg-white sticky top-0">
       <Link href="/" className="flex flex-col items-center">
         {initialOrgData?.organization.logo ? (
           <Image
             src={initialOrgData.organization.logo}
             alt={`${initialOrgData.organization.name} Logo`}
-            width={100}
-            height={50}
+            width={80}
+            height={20}
             className="object-contain"
           />
         ) : (
