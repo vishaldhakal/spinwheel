@@ -205,7 +205,7 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
             </h3>
             {winner && winner.name !== "Better Luck" ? (
               <>
-                <p className="text-xl mb-4">You've won a {winner.name}!</p>
+                <p className="text-xl mb-4">You&apos;ve won a {winner.name}!</p>
                 {/* imei number */}
                 <p className="text-xl mb-4">
                   Your IMEI number is {submissionResponse.imei}
@@ -221,8 +221,8 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
             ) : (
               <>
                 <p className="text-xl mb-4 text-[#ff6666]">
-                  Unfortunately, you didn't win a prize this time. Try again
-                  next time!
+                  Unfortunately, you didn&apos;t win a prize this time. Try
+                  again next time!
                 </p>
                 <Image
                   src={winner?.image || ""}
