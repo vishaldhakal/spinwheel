@@ -58,9 +58,18 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
       setIsSpinning(true);
       setWinner(null);
 
-      const winningIndex = giftList.findIndex(
-        (gift) => gift.id === submissionResponse.gift?.id
-      );
+      // Handle both null and empty array cases for gift
+      const hasValidGift =
+        submissionResponse.gift &&
+        !Array.isArray(submissionResponse.gift) &&
+        typeof submissionResponse.gift === "object" &&
+        submissionResponse.gift.id;
+
+      const winningIndex = hasValidGift
+        ? giftList.findIndex(
+            (gift) => gift.id === (submissionResponse.gift as GiftItem).id
+          )
+        : -1;
       const prizeAngle = 360 / giftList.length;
       const fullRotations = Math.floor(Math.random() * 5 + 5) * 360;
 
@@ -72,7 +81,7 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
       // Set isSpinning to false after 5 seconds (spinning animation duration)
       setTimeout(() => {
         setIsSpinning(false);
-        setWinner(submissionResponse.gift || null);
+        setWinner(hasValidGift ? (submissionResponse.gift as GiftItem) : null);
         setHasSpun(true);
 
         // Show popup and confetti after an additional 3 seconds
@@ -81,6 +90,9 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
 
           if (
             submissionResponse.gift &&
+            !Array.isArray(submissionResponse.gift) &&
+            typeof submissionResponse.gift === "object" &&
+            submissionResponse.gift.name &&
             submissionResponse.gift.name !== "Better Luck"
           ) {
             setShowConfetti(true);
@@ -191,7 +203,7 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
               <X size={24} />
             </button>
             <h3 className="text-2xl font-bold mb-4 flex items-center justify-center">
-              {winner && winner.name !== "Better Luck" ? (
+              {winner && winner.name && winner.name !== "Better Luck" ? (
                 <>
                   <Gift className="mr-2" size={24} />
                   Congratulations!
@@ -203,7 +215,7 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
                 </>
               )}
             </h3>
-            {winner && winner.name !== "Better Luck" ? (
+            {winner && winner.name && winner.name !== "Better Luck" ? (
               <>
                 <p className="text-xl mb-4">You&apos;ve won a {winner.name}!</p>
                 {/* imei number */}
@@ -225,7 +237,7 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
                   again next time!
                 </p>
                 <Image
-                  src={winner?.image || ""}
+                  src={winner?.image || "/betterlucknexttime.png"}
                   alt={winner?.name || ""}
                   width={150}
                   height={150}

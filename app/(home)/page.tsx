@@ -170,13 +170,6 @@ export default function Home() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-white drop-shadow-lg max-w-4xl mx-auto">
               {data.hero_title || data.name}
             </h1>
-            <div className="text-base md:text-lg text-white prose prose-invert max-w-3xl mx-auto content-area leading-relaxed px-4">
-              {data.description ? (
-                <div dangerouslySetInnerHTML={sanitizeHtml(data.description)} />
-              ) : (
-                "Details coming soon..."
-              )}
-            </div>
 
             <div className="flex justify-center space-x-6 mt-4">
               <Link

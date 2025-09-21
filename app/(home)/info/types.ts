@@ -17,16 +17,16 @@ export interface Organization {
    lucky_draw_system: number;
  }
  
- export interface SubmissionResponse {
-   customer_name: string;
-   date_of_purchase: string;
-   gift: GiftItem | null;
-   imei: string;
-   phone_model: string;
-   phone_number: string;
-   shop_name: string;
-   sold_area: string;
- }
+export interface SubmissionResponse {
+  customer_name: string;
+  date_of_purchase: string;
+  gift: GiftItem | null | GiftItem[];
+  imei: string;
+  phone_model: string;
+  phone_number: string;
+  shop_name: string;
+  sold_area: string;
+}
 
  export interface ErrorResponse {
   error: string;
