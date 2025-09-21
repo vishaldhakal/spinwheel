@@ -234,7 +234,7 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
               </>
             )}
             <p className="text-2xl font-bold mt-6 mb-8 text-[#ff8c00]">
-              Happy New Year 2082!
+              Happy Dashain!
             </p>
             <button
               onClick={goToHome}
