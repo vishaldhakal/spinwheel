@@ -64,19 +64,22 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
       setShowStoppingPosition(false);
       setStoppedAtGift(null);
 
-      // Handle both null and empty array cases for gift
-      const validGift =
-        submissionResponse.gift &&
-        !Array.isArray(submissionResponse.gift) &&
-        typeof submissionResponse.gift === "object" &&
-        submissionResponse.gift.id;
+      // Normalize gift from backend: could be null, object, or array with one object
+      const giftData = submissionResponse.gift;
+      const selectedGift: GiftItem | null = Array.isArray(giftData)
+        ? giftData.length > 0
+          ? (giftData[0] as GiftItem)
+          : null
+        : (giftData as GiftItem | null);
+
+      const validGift = !!(selectedGift && selectedGift.id);
 
       setHasValidGift(!!validGift);
 
       // If gift is empty array or null, stop at Better Luck (index 0)
       const winningIndex = validGift
         ? giftList.findIndex(
-            (gift) => gift.id === (submissionResponse.gift as GiftItem).id
+            (gift) => gift.id === (selectedGift as GiftItem).id
           )
         : 0; // Always stop at Better Luck when no valid gift
 
@@ -92,7 +95,7 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
       // Set isSpinning to false after 5 seconds (spinning animation duration)
       setTimeout(() => {
         setIsSpinning(false);
-        setWinner(validGift ? (submissionResponse.gift as GiftItem) : null);
+        setWinner(validGift ? (selectedGift as GiftItem) : null);
         setHasSpun(true);
 
         // Show where the wheel stopped first - always show the actual stopped position
@@ -107,16 +110,14 @@ const SubmissionResult: React.FC<SubmissionResultProps> = ({
 
           if (
             validGift &&
-            submissionResponse.gift &&
-            !Array.isArray(submissionResponse.gift) &&
-            typeof submissionResponse.gift === "object" &&
-            submissionResponse.gift.name &&
-            submissionResponse.gift.name !== "Better Luck"
+            selectedGift &&
+            selectedGift.name &&
+            selectedGift.name !== "Better Luck"
           ) {
             setShowConfetti(true);
             toast({
               title: "Congratulations!",
-              description: `You've won a ${submissionResponse.gift.name}!`,
+              description: `You've won a ${selectedGift.name}!`,
             });
           } else {
             toast({
